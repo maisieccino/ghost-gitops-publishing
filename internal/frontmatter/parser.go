@@ -26,6 +26,7 @@ type Meta struct {
 	FeatureImage   string   `yaml:"feature_image,omitempty"`
 	Tags           []string `yaml:"tags,omitempty"`
 	PostID         string   `yaml:"post_id,omitempty"` // set after first publish
+	Digest         string   `yaml:"digest,omitempty"`  // SHA256 of Markdown body
 }
 
 // ParseFile reads a Markdown file and returns its meta + body bytes.

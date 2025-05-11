@@ -5,6 +5,8 @@ package main
 import (
 	"bytes"
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
 	"fmt"
 	"net/http"
 	"path/filepath"
@@ -39,6 +41,16 @@ func publishCmd() *cobra.Command {
 			meta, md, err := frontmatter.ParseFile(file)
 			if err != nil {
 				return err
+			}
+
+			// Compute SHA256 digest of Markdown body
+			h := sha256.Sum256(md)
+			nowDigest := hex.EncodeToString(h[:])
+
+			// If digest matches, skip publishing
+			if meta.Digest == nowDigest {
+				fmt.Println("↻ no changes since last publish, skipping…")
+				return nil
 			}
 
 			imgSvc := images.New(cfg.APIURL, cfg.AdminJWT, httpClient)
@@ -87,6 +99,11 @@ func publishCmd() *cobra.Command {
 			}
 			if meta.Status != ghostPost.Status {
 				meta.Status = ghostPost.Status
+				dirty = true
+			}
+			// Always update digest after publish
+			if meta.Digest != nowDigest {
+				meta.Digest = nowDigest
 				dirty = true
 			}
 			if dirty {
