@@ -61,6 +61,48 @@ func publishCmd() *cobra.Command {
 				return err
 			}
 
+			client := api.New(cfg.APIURL, cfg.AdminJWT)
+
+			// Map author names to IDs with error handling
+			allAuthors, err := client.ListAuthors(context.Background())
+			var authorIDs []string
+			if err != nil {
+				fmt.Println("warning: could not fetch authors from Ghost, using names as IDs")
+				authorIDs = meta.Authors
+			} else {
+				nameToAuthorID := map[string]string{}
+				for _, a := range allAuthors {
+					nameToAuthorID[a.Name] = a.ID
+				}
+				for _, name := range meta.Authors {
+					if id, ok := nameToAuthorID[name]; ok {
+						authorIDs = append(authorIDs, id)
+					}
+				}
+			}
+
+			// Map tier names/slugs to TierRef (ID+Name+Slug)
+			allTiers, err := client.ListTiers(context.Background())
+			if err != nil {
+				return fmt.Errorf("could not fetch tiers: %w", err)
+			}
+			byName := make(map[string]api.TierRef, len(allTiers))
+			bySlug := make(map[string]api.TierRef, len(allTiers))
+			for _, t := range allTiers {
+				byName[t.Name] = t
+				bySlug[t.Slug] = t
+			}
+			var tierRefs []api.TierRef
+			for _, want := range meta.Tiers {
+				if t, ok := byName[want]; ok {
+					tierRefs = append(tierRefs, t)
+				} else if t, ok := bySlug[want]; ok {
+					tierRefs = append(tierRefs, t)
+				} else {
+					return fmt.Errorf("unknown tier %q (available: %v)", want, keys(byName))
+				}
+			}
+
 			post := api.Post{
 				Title:          meta.Title,
 				Slug:           meta.Slug,
@@ -71,12 +113,11 @@ func publishCmd() *cobra.Command {
 				CustomExcerpt:  meta.CustomExcerpt,
 				PublishedAt:    meta.PublishedAt,
 				Visibility:     meta.Visibility,
-				Tiers:          meta.Tiers,
+				Tiers:          api.WrapTiers(tierRefs),
 				Featured:       meta.Featured,
-				Authors:        meta.Authors,
+				Authors:        api.WrapAuthors(authorIDs),
 				CustomTemplate: meta.CustomTemplate,
 			}
-			client := api.New(cfg.APIURL, cfg.AdminJWT)
 			newID, err := api.Upsert(client, post, meta.PostID)
 			if err != nil {
 				return err
@@ -101,9 +142,35 @@ func publishCmd() *cobra.Command {
 				meta.Status = ghostPost.Status
 				dirty = true
 			}
-			// Always update digest after publish
-			if meta.Digest != nowDigest {
-				meta.Digest = nowDigest
+			// update meta.Authors with human-readable names from ghostPost
+			var newAuthors []string
+			for _, a := range ghostPost.Authors {
+				newAuthors = append(newAuthors, a.Name)
+			}
+			if len(meta.Authors) != len(newAuthors) {
+				meta.Authors = newAuthors
+				dirty = true
+			} else {
+				for i := range meta.Authors {
+					if meta.Authors[i] != newAuthors[i] {
+						meta.Authors = newAuthors
+						dirty = true
+						break
+					}
+				}
+			}
+			// update meta.Tiers with human-readable names from ghostPost
+			var newTiers []string
+			for _, t := range ghostPost.Tiers {
+				newTiers = append(newTiers, t.Name)
+			}
+			if !api.EqualStringSlices(meta.Tiers, newTiers) {
+				meta.Tiers = newTiers
+				dirty = true
+			}
+			// Always update hash after publish
+			if meta.Hash != nowHash {
+				meta.Hash = nowHash
 				dirty = true
 			}
 			if dirty {
@@ -127,4 +194,13 @@ func publishCmd() *cobra.Command {
 	cmd.MarkFlagRequired("file")
 	cmd.Flags().BoolVarP(&openEditor, "editor", "e", false, "Open post in Ghost editor")
 	return cmd
+}
+
+// Helper to list keys for error messages
+func keys[K comparable, V any](m map[K]V) []K {
+	out := make([]K, 0, len(m))
+	for k := range m {
+		out = append(out, k)
+	}
+	return out
 }

@@ -23,6 +23,27 @@ type Client struct {
 	lastBody io.Reader // stores the last response body for debugging
 }
 
+func (c *Client) ListAuthors(ctx context.Context) ([]AuthorRef, error) {
+	var res struct {
+		Authors []AuthorRef `json:"authors"`
+	}
+	if err := c.Get(ctx, "authors/", &res); err != nil {
+		return nil, err
+	}
+	return res.Authors, nil
+}
+
+// ListTiers fetches all membership tiers from Ghost
+func (c *Client) ListTiers(ctx context.Context) ([]TierRef, error) {
+	var res struct {
+		Tiers []TierRef `json:"tiers"`
+	}
+	if err := c.Get(ctx, "tiers/?limit=all", &res); err != nil {
+		return nil, err
+	}
+	return res.Tiers, nil
+}
+
 func New(base, jwt string) *Client {
 	return &Client{
 		Base: base,
