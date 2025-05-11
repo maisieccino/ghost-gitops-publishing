@@ -14,26 +14,30 @@ jobs:
       matrix:
         include:
           # --------- linux ----------
-          - goos: linux   # x86_64
+          - goos: linux     # x86_64
             goarch: amd64
             ext: ""
             archive: tar.gz
-          - goos: linux   # arm64
+          - goos: linux     # arm64
             goarch: arm64
             ext: ""
             archive: tar.gz
           # --------- macOS ----------
           - goos: darwin
-            goarch: amd64
+            goarch: amd64   # intel
             ext: ""
             archive: tar.gz
           - goos: darwin
-            goarch: arm64
+            goarch: arm64   # apple silicon
             ext: ""
             archive: tar.gz
           # --------- windows --------
           - goos: windows
-            goarch: amd64
+            goarch: amd64   # x86_64
+            ext: .exe
+            archive: zip
+          - goos: windows   # arm64
+            goarch: arm64
             ext: .exe
             archive: zip
     steps:
