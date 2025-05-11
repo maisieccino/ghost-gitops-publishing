@@ -45,10 +45,10 @@ func publishCmd() *cobra.Command {
 
 			// Compute SHA256 digest of Markdown body
 			h := sha256.Sum256(md)
-			nowDigest := hex.EncodeToString(h[:])
+			nowHash := hex.EncodeToString(h[:])
 
-			// If digest matches, skip publishing
-			if meta.Digest == nowDigest {
+			// If hash matches, skip publishing
+			if meta.Hash == nowHash {
 				fmt.Println("↻ no changes since last publish, skipping…")
 				return nil
 			}

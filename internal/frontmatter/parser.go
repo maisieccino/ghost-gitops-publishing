@@ -26,7 +26,7 @@ type Meta struct {
 	FeatureImage   string   `yaml:"feature_image,omitempty"`
 	Tags           []string `yaml:"tags,omitempty"`
 	PostID         string   `yaml:"post_id,omitempty"` // set after first publish
-	Digest         string   `yaml:"digest,omitempty"`  // SHA256 of Markdown body
+	Hash           string   `yaml:"hash,omitempty"`    // SHA256 of Markdown body
 }
 
 // ParseFile reads a Markdown file and returns its meta + body bytes.
@@ -42,12 +42,17 @@ func ParseFile(path string) (Meta, []byte, error) {
 
 // WriteFile rewrites the Markdown file with updated front-matter.
 func WriteFile(path string, meta Meta, body []byte) error {
+	// marshal the front-matter
 	fmBytes, _ := yaml.Marshal(meta)
 
+	// strip out any leading "\n" so we only get one blank line
+	body = bytes.TrimLeft(body, "\n")
+
+	// build the new file
 	var buf bytes.Buffer
 	buf.WriteString("---\n")
 	buf.Write(fmBytes)
-	buf.WriteString("---\n\n")
+	buf.WriteString("---\n\n") // one blank line before the content
 	buf.Write(body)
 
 	return os.WriteFile(path, buf.Bytes(), 0o644)
