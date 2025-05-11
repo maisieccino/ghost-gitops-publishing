@@ -1,38 +1,55 @@
-# ghostpost — Git-first publishing to Ghost
+# Ghost GitOps Publishing
 
-Ghost gives you a fast writing UI.
-Git gives you real history, branches, reviews, CI.
+Draft, update, and publish Ghost posts via a GitOps Markdown workflow.
+
+Ghost gives you the bloggin platform.
+Git gives you version control, history, branches, reviews, cloud pipelines.
 
 `ghostpost` glues them together.
 
-You keep every post as a Markdown file with front-matter.
-`ghostpost` turns that file into a Ghost draft (or update) with one command.
+You keep your post as a Markdown file with front-matter.
+One command turns it into a Ghost draft—or updates an existing post.
 
+## Features
 
-## Why you might care
+### Front-matter driven
 
-* **Version control**
-  See every change in `git log`, run spell-check in CI, review with pull requests.
+Define title, slug, tags, status, excerpt, schedule.
+`ghostpost` reads and writes the `post_id` for you.
 
-* **Stateless deploys**
-  No local caches. The post ID lives in the Markdown front-matter.
+### Idempotent updates
 
-* **Images on the fly**
-  Local image paths become Ghost URLs automatically.
+`ghostpost` fetches the current `updated_at` lock and issues a `PUT`.
+Your edits replace the previous version so you are always in sync.
 
-* **No runtime deps**
-  A single static Go binary for macOS, Linux, or Windows.
-
-
-## Install
+### Open in online CMS editor after publishing
 
 ```bash
-go install github.com/rodchristiansen/ghost-gitops-publishing/cmd/ghostpost@latest
+ghostpost publish -f post.md --editor
 ```
 
-The binary lands in your `$GOPATH/bin` (often `~/go/bin`).
-Add that directory to `$PATH` if needed.
+Opens your browser at `/ghost/#/editor/post/{post_id}`
 
+## Why `ghostpost`
+
+What if you could manage your blog like code?
+
+**Version control**
+* Track every edit in `git log`.
+* Run spell-check in CI.
+* Review via pull requests.
+
+**Stateless deploys**
+* No local state.
+* The `post_id` lives in your front-matter.
+* Everything self-contained in `.md` article.
+
+**Automatic images**
+* Reference local image paths.
+* `ghostpost` uploads and updates URLs.
+
+**Zero dependencies**
+* One static Go binary for macOS, Linux, Windows.
 
 ## Setup
 
@@ -44,9 +61,8 @@ admin_jwt:  123abc456def:deadbeefcafef00d...   # Admin key or signed JWT
 ```
 
 * You can paste the raw **Admin API key**.
-  ghostpost signs it for you.
+  `ghostpost` signs it for you with `jwt`
 * The trailing slash in `api_url` is needed.
-
 
 ## Your first post
 
@@ -69,7 +85,7 @@ Publish:
 ghostpost publish -f welcome.md
 ```
 
-ghostpost:
+`ghostpost`:
 
 1. Uploads any local images it finds.
 2. Converts Markdown → HTML with Goldmark.
@@ -84,50 +100,36 @@ post_id: 681fcffa6cf6ba0001ccf0e9
 
 Commit that change—now the ID tracks with your content.
 
-
-
 ## Fix a typo
 
 Edit the file, run the same command again.
 
-ghostpost:
+`ghostpost`:
 
 * Pulls the current `updated_at` timestamp.
 * Sends a `PUT /posts/{id}` with that lock.
 * Ghost patches the post.
 
-
-
 ## Jump straight to the editor
 
 ```bash
 ghostpost publish -f welcome.md --editor
-# or
-ghostpost publish -f welcome.md -e
 ```
 
-Your browser opens:
-
-```
-https://your-site.ghost.io/ghost/#/editor/post/681fcffa6cf6ba0001ccf0e9
-```
-
-
+Your browser opens: `https://your-site.ghost.io/ghost/#/editor/post/681fcffa6cf6ba0001ccf0e9`
 
 ## Front-matter keys
 
-| key              | purpose                             |
-| - | -- |
-| `title`          | Post title                          |
-| `slug`           | URL slug (optional)                 |
-| `tags`           | Array or YAML list                  |
-| `feature_image`  | Path or URL                         |
-| `status`         | `draft`, `published`, `scheduled`   |
-| `published_at`   | ISO date string for schedule        |
-| `custom_excerpt` | Manual excerpt                      |
-| `post_id`        | Added by ghostpost after first push |
-
-
+| key              | purpose                               |
+| ---------------- | ------------------------------------- |
+| `title`          | Post title                            |
+| `slug`           | URL slug (optional)                   |
+| `tags`           | Array or YAML list                    |
+| `feature_image`  | Path or URL                           |
+| `status`         | `draft`, `published`, `scheduled`.    |
+| `published_at`   | ISO date string for schedule          |
+| `custom_excerpt` | Manual excerpt                        |
+| `post_id`        | Added by `ghostpost` after first push |
 
 ## CI example
 
@@ -144,7 +146,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
-        with: {go-version: '1.22'}
+        with: {go-version: '1.24.2'}
       - run: go install github.com/rodchristiansen/ghost-gitops-publishing/cmd/ghostpost@latest
       - run: |
           for f in posts/*.md; do
@@ -154,15 +156,6 @@ jobs:
           GHOST_API_URL:  ${{ secrets.GHOST_API_URL }}
           GHOST_ADMIN_JWT: ${{ secrets.GHOST_ADMIN_JWT }}
 ```
-
-
-
-## Roadmap
-
-* Tag management (`ghostpost tags …`)
-* Image garbage-collection
-* Live preview server
-* Windows cross-compile releases
 
 ## Contributing
 
@@ -175,3 +168,5 @@ Pull requests and issues welcome.
 ## License
 
 MIT. See `LICENSE` file.
+
+> Inspired by the "Articles as Code" idea from [post2ghost](https://www.how-hard-can-it.be/post2ghost/)
