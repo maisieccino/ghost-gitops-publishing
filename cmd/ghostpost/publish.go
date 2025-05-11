@@ -4,6 +4,7 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"net/http"
 	"path/filepath"
@@ -69,8 +70,26 @@ func publishCmd() *cobra.Command {
 				return err
 			}
 
-			if meta.PostID == "" { // first publish → persist ID
+			// Always refresh the post from Ghost so we get the real published_at + status
+			ghostPost, err := client.GetPost(context.Background(), newID)
+			if err != nil {
+				return err
+			}
+
+			dirty := false
+			if meta.PostID == "" {
 				meta.PostID = newID
+				dirty = true
+			}
+			if meta.PublishedAt != ghostPost.PublishedAt {
+				meta.PublishedAt = ghostPost.PublishedAt
+				dirty = true
+			}
+			if meta.Status != ghostPost.Status {
+				meta.Status = ghostPost.Status
+				dirty = true
+			}
+			if dirty {
 				if err := frontmatter.WriteFile(file, meta, md); err != nil {
 					return err
 				}
