@@ -34,24 +34,25 @@ Opens your browser at `/ghost/#/editor/post/{post_id}`
 
 What if you could manage your blog like code?
 
-**Version control**
+### Version control
 
 - Track every edit in `git log`
 - Run spell-check in CI
 - Review via pull requests
 
-**Stateless deploys**  
+### Stateless deploys
 
 - No local state  
 - The `post_id` lives in your front-matter  
 - Everything self-contained in the `.md` article
 
-**Automatic images**  
+### Automatic images
 
 - Reference local image paths  
 - `ghostpost` uploads and updates URLs
 
-**Zero dependencies**  
+### Zero dependencies
+
 - One static Go binary for macOS, Linux, Windows
 
 ## Setup
@@ -74,10 +75,26 @@ admin_jwt: 123abc456def:deadbeefcafef00d...   # Admin key or signed JWT
 ---
 title: Welcome to Focused Systems
 slug: welcome-to-focused-systems
-tags: [DevOps, CI/CD]
-status: draft            # default is draft
-custom_excerpt: Why this blog exists
-Hello world…
+custom_excerpt: Insights, guides, and updates on technology and workflows
+tags:
+  - DevOps
+  - CI/CD
+feature_image: assets/hero.png      # relative path or URL to your cover image
+status: draft                       # draft | published | scheduled
+published_at: 2025-06-15T09:00:00Z  # ISO timestamp for scheduling (optional)
+visibility: public                  # public | members | paid | specific
+tiers:
+  - free                            # which paid tiers can see this (optional)
+featured: false                     # show as “featured” in your theme?
+authors:
+  - rodchristiansen                 # Ghost user slugs
+custom_template: post               # choose a custom template (optional)
+post_id: ""                         # filled in by ghostpost after first publish
+---
+
+## Hello world
+
+Welcome to my very first post—managed entirely via GitOps!  
 ```
 
 Publish:
