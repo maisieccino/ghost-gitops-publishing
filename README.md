@@ -2,24 +2,24 @@
 
 Draft, update, and publish Ghost posts via a GitOps Markdown workflow.
 
-Ghost gives you the bloggin platform.
+Ghost gives you the blogging platform.  
 Git gives you version control, history, branches, reviews, cloud pipelines.
 
 `ghostpost` glues them together.
 
-You keep your post as a Markdown file with front-matter.
+You keep your post as a Markdown file with front-matter.  
 One command turns it into a Ghost draft—or updates an existing post.
 
 ## Features
 
 ### Front-matter driven
 
-Define title, slug, tags, status, excerpt, schedule.
+Define title, slug, tags, status, excerpt, schedule, visibility, authors, templates, and more.  
 `ghostpost` reads and writes the `post_id` for you.
 
 ### Idempotent updates
 
-`ghostpost` fetches the current `updated_at` lock and issues a `PUT`.
+`ghostpost` fetches the current `updated_at` lock and issues a `PUT`.  
 Your edits replace the previous version so you are always in sync.
 
 ### Open in online CMS editor after publishing
@@ -35,47 +35,48 @@ Opens your browser at `/ghost/#/editor/post/{post_id}`
 What if you could manage your blog like code?
 
 **Version control**
-* Track every edit in `git log`.
-* Run spell-check in CI.
-* Review via pull requests.
 
-**Stateless deploys**
-* No local state.
-* The `post_id` lives in your front-matter.
-* Everything self-contained in `.md` article.
+- Track every edit in `git log`
+- Run spell-check in CI
+- Review via pull requests
 
-**Automatic images**
-* Reference local image paths.
-* `ghostpost` uploads and updates URLs.
+**Stateless deploys**  
 
-**Zero dependencies**
-* One static Go binary for macOS, Linux, Windows.
+- No local state  
+- The `post_id` lives in your front-matter  
+- Everything self-contained in the `.md` article
+
+**Automatic images**  
+
+- Reference local image paths  
+- `ghostpost` uploads and updates URLs
+
+**Zero dependencies**  
+- One static Go binary for macOS, Linux, Windows
 
 ## Setup
 
-Create `~/.ghostpost/config.yaml` (or keep it in the repo).
+Create `~/.ghostpost/config.yaml` (or keep it in the repo):
 
 ```yaml
-api_url:  https://your-site.ghost.io/ghost/api/admin/
-admin_jwt:  123abc456def:deadbeefcafef00d...   # Admin key or signed JWT
+api_url:   https://your-site.ghost.io/ghost/api/admin/
+admin_jwt: 123abc456def:deadbeefcafef00d...   # Admin key or signed JWT
 ```
 
-* You can paste the raw **Admin API key**.
-  `ghostpost` signs it for you with `jwt`
-* The trailing slash in `api_url` is needed.
+- You can paste the raw **Admin API key**; `ghostpost` will auto-sign it.  
+- The trailing slash in `api_url` is required.
 
 ## Your first post
 
-`welcome.md`
+`welcome.md`:
 
 ```md
-
+---
 title: Welcome to Focused Systems
 slug: welcome-to-focused-systems
 tags: [DevOps, CI/CD]
 status: draft            # default is draft
 custom_excerpt: Why this blog exists
-
 Hello world…
 ```
 
@@ -85,14 +86,14 @@ Publish:
 ghostpost publish -f welcome.md
 ```
 
-`ghostpost`:
+`ghostpost` will:
 
-1. Uploads any local images it finds.
-2. Converts Markdown → HTML with Goldmark.
-3. Creates the post in Ghost.
-4. Writes the returned `post_id` back into the front-matter.
+1. Upload any local images it finds.  
+2. Convert Markdown → HTML with Goldmark.  
+3. Create the post in Ghost.  
+4. Write the returned `post_id` back into the front-matter.
 
-The file now looks like:
+Your file now contains:
 
 ```yaml
 post_id: 681fcffa6cf6ba0001ccf0e9
@@ -106,9 +107,9 @@ Edit the file, run the same command again.
 
 `ghostpost`:
 
-* Pulls the current `updated_at` timestamp.
-* Sends a `PUT /posts/{id}` with that lock.
-* Ghost patches the post.
+- Pulls the current `updated_at` timestamp.  
+- Sends a `PUT /posts/{id}` with that lock.  
+- Ghost patches the post.
 
 ## Jump straight to the editor
 
@@ -116,20 +117,26 @@ Edit the file, run the same command again.
 ghostpost publish -f welcome.md --editor
 ```
 
-Your browser opens: `https://your-site.ghost.io/ghost/#/editor/post/681fcffa6cf6ba0001ccf0e9`
+Your browser opens:  
+`https://your-site.ghost.io/ghost/#/editor/post/681fcffa6cf6ba0001ccf0e9`
 
 ## Front-matter keys
 
-| key              | purpose                               |
-| ---------------- | ------------------------------------- |
-| `title`          | Post title                            |
-| `slug`           | URL slug (optional)                   |
-| `tags`           | Array or YAML list                    |
-| `feature_image`  | Path or URL                           |
-| `status`         | `draft`, `published`, `scheduled`.    |
-| `published_at`   | ISO date string for schedule          |
-| `custom_excerpt` | Manual excerpt                        |
-| `post_id`        | Added by `ghostpost` after first push |
+| Key               | Purpose                                  |
+| ----------------- | ---------------------------------------- |
+| `title`           | Post title                               |
+| `slug`            | URL slug (optional)                      |
+| `tags`            | Array or YAML list                       |
+| `feature_image`   | Path or URL                              |
+| `status`          | `draft`, `published`, `scheduled`        |
+| `published_at`    | ISO date string for scheduling           |
+| `visibility`      | `public`, `members`, `paid`, `specific`  |
+| `tiers`           | Array of paid tiers (for `specific`)     |
+| `featured`        | `true`/`false` to feature the post       |
+| `custom_excerpt`  | Manual excerpt                           |
+| `authors`         | Array of author names                    |
+| `custom_template` | Template name (e.g. `Full Feature Image`)|
+| `post_id`         | Populated by `ghostpost` after first push|
 
 ## CI example
 
@@ -138,7 +145,7 @@ name: Publish
 on:
   push:
     branches: [main]
-    paths: ["posts/**.md"]
+    paths: ["posts/**/*.md"]
 
 jobs:
   ghost:
@@ -146,27 +153,27 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
-        with: {go-version: '1.24.2'}
+        with:
+          go-version: '1.24.2'
       - run: go install github.com/rodchristiansen/ghost-gitops-publishing/cmd/ghostpost@latest
       - run: |
           for f in posts/*.md; do
             ghostpost publish -f "$f"
           done
         env:
-          GHOST_API_URL:  ${{ secrets.GHOST_API_URL }}
+          GHOST_API_URL:   ${{ secrets.GHOST_API_URL }}
           GHOST_ADMIN_JWT: ${{ secrets.GHOST_ADMIN_JWT }}
 ```
 
 ## Contributing
 
-Pull requests and issues welcome.
+Pull requests and issues welcome!
 
-* Run `go vet ./...` and `go test ./...` before pushing.
-* Keep sentences short.
-  Write like a friend who figured something out.
+- Run `go vet ./...` and `go test ./...` before pushing.  
+- Keep sentences short; write like a friend who figured something out.
 
 ## License
 
-MIT. See `LICENSE` file.
+MIT. See the `LICENSE` file.
 
-> Inspired by the "Articles as Code" idea from [post2ghost](https://www.how-hard-can-it.be/post2ghost/)
+> Inspired by the “Articles as Code” idea from [post2ghost](https://www.how-hard-can-it.be/post2ghost/)  

@@ -7,16 +7,21 @@ type postReq struct {
 }
 
 type Post struct {
-	ID            string   `json:"id,omitempty"`
-	Title         string   `json:"title"`
-	Slug          string   `json:"slug,omitempty"`
-	Status        string   `json:"status,omitempty"`
-	HTML          string   `json:"html"`
-	FeatureImage  string   `json:"feature_image,omitempty"`
-	Tags          []tagRef `json:"tags,omitempty"`
-	CustomExcerpt string   `json:"custom_excerpt,omitempty"`
-	PublishedAt   string   `json:"published_at,omitempty"`
-	UpdatedAt     string   `json:"updated_at,omitempty"`
+	ID             string   `json:"id,omitempty"`
+	Title          string   `json:"title"`
+	Slug           string   `json:"slug,omitempty"`
+	Status         string   `json:"status,omitempty"`
+	HTML           string   `json:"html"`
+	FeatureImage   string   `json:"feature_image,omitempty"`
+	Tags           []tagRef `json:"tags,omitempty"`
+	CustomExcerpt  string   `json:"custom_excerpt,omitempty"`
+	PublishedAt    string   `json:"published_at,omitempty"`
+	Visibility     string   `json:"visibility,omitempty"`
+	Tiers          []string `json:"tiers,omitempty"`
+	Featured       bool     `json:"featured,omitempty"`
+	Authors        []string `json:"authors,omitempty"`
+	CustomTemplate string   `json:"custom_template,omitempty"`
+	UpdatedAt      string   `json:"updated_at,omitempty"`
 }
 
 type tagRef struct {

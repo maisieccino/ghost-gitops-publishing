@@ -49,14 +49,19 @@ func publishCmd() *cobra.Command {
 			}
 
 			post := api.Post{
-				Title:         meta.Title,
-				Slug:          meta.Slug,
-				Status:        defaultStatus(meta.Status),
-				HTML:          html.String(),
-				FeatureImage:  meta.FeatureImage,
-				Tags:          api.WrapTags(meta.Tags),
-				CustomExcerpt: meta.CustomExcerpt,
-				PublishedAt:   meta.PublishedAt,
+				Title:          meta.Title,
+				Slug:           meta.Slug,
+				Status:         defaultStatus(meta.Status),
+				HTML:           html.String(),
+				FeatureImage:   meta.FeatureImage,
+				Tags:           api.WrapTags(meta.Tags),
+				CustomExcerpt:  meta.CustomExcerpt,
+				PublishedAt:    meta.PublishedAt,
+				Visibility:     meta.Visibility,
+				Tiers:          meta.Tiers,
+				Featured:       meta.Featured,
+				Authors:        meta.Authors,
+				CustomTemplate: meta.CustomTemplate,
 			}
 			client := api.New(cfg.APIURL, cfg.AdminJWT)
 			newID, err := api.Upsert(client, post, meta.PostID)

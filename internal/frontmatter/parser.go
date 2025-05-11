@@ -13,14 +13,19 @@ import (
 // Meta holds every key ghostpost cares about.
 // Add more tags as your workflow grows.
 type Meta struct {
-	Title         string   `yaml:"title"`
-	Slug          string   `yaml:"slug,omitempty"`
-	FeatureImage  string   `yaml:"feature_image,omitempty"`
-	Tags          []string `yaml:"tags,omitempty"`
-	CustomExcerpt string   `yaml:"custom_excerpt,omitempty"`
-	Status        string   `yaml:"status,omitempty"` // draft | published | scheduled
-	PublishedAt   string   `yaml:"published_at,omitempty"`
-	PostID        string   `yaml:"post_id,omitempty"` // set after first publish
+	Title          string   `yaml:"title"`
+	Slug           string   `yaml:"slug,omitempty"`
+	Status         string   `yaml:"status,omitempty"` // draft | published | scheduled
+	PublishedAt    string   `yaml:"published_at,omitempty"`
+	Visibility     string   `yaml:"visibility,omitempty"` // public | members | paid | specific
+	Tiers          []string `yaml:"tiers,omitempty"`
+	Featured       bool     `yaml:"featured,omitempty"`
+	CustomExcerpt  string   `yaml:"custom_excerpt,omitempty"`
+	Authors        []string `yaml:"authors,omitempty"`
+	CustomTemplate string   `yaml:"custom_template,omitempty"`
+	FeatureImage   string   `yaml:"feature_image,omitempty"`
+	Tags           []string `yaml:"tags,omitempty"`
+	PostID         string   `yaml:"post_id,omitempty"` // set after first publish
 }
 
 // ParseFile reads a Markdown file and returns its meta + body bytes.
