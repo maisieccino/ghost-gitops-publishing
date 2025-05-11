@@ -2,8 +2,8 @@
 
 Draft, update, and publish Ghost posts via a GitOps Markdown workflow.
 
-Ghost gives you the blogging platform.
-Git gives you version control, history, branches, reviews, cloud pipelines.
+[Ghost](https://ghost.org) gives you the blogging platform.
+[Git](https://git-scm.com) gives you version control, history, branches, reviews, cloud pipelines.
 
 `ghostpost` glues them together.
 
