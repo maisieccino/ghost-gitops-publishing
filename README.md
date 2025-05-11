@@ -196,4 +196,5 @@ Pull requests and issues welcome!
 
 MIT. See the `LICENSE` file.
 
-> Inspired by the “Articles as Code” idea from [post2ghost](https://www.how-hard-can-it.be/post2ghost/)
+## Inspiration
+GhostPost was inspired by the “Articles as Code” idea from [post2ghost](https://www.how-hard-can-it.be/post2ghost/)
